@@ -1,21 +1,33 @@
-name: Basic CI/CD Pipeline
+name: Deploy Flask App to Vercel
 
-on: push
+on:
+  push:
+    branches:
+      - main  
+  pull_request:
+    branches:
+      - main 
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Clone Repository
+      - name: Checkout Repository
         uses: actions/checkout@v3
 
-      - name: Set up Python
-        uses: actions/setup-python@v3
+      - name: Set up Pythonc
+        uses: actions/setup-python@v4
         with:
-          python-version: "3.10"
+          python-version: '3.10'
 
       - name: Install Dependencies
-        run: pip3 install -r requirements.txt
+        run: |
+          python -m venv venv
+          source venv/bin/activate
+          pip install -r requirements.txt
 
-      - name: Run Test Cases
-        run: pytest test.py
+      - name: Deploy to Vercel
+        run: |
+          npm install -g vercel
+          vercel --token ${{ secrets.VERCEL_TOKEN }} --prod --confirm --scope ${{ secrets.VERCEL_ORG_ID }}
